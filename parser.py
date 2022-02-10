@@ -17,6 +17,8 @@ for cat in categories:
 
     #A,B,C,D, ...
     for alpha in alphabets:
+        if alpha in "ABEFGHIJKLMNOPQRSTUVWXYZ":
+            continue
         print('* alphabet: ', alpha)
         file_path = "./{}.json".format(alpha)
         data = {}
@@ -29,6 +31,7 @@ for cat in categories:
 
         #ambrette seed, ...
         for item in items:
+            print('* name: ', item)
             item_page = requests.get(items[item])
             item_soup = bs(item_page.text, "html.parser")
 
@@ -39,12 +42,12 @@ for cat in categories:
 
             #Demo Formula
             if len(pages) > 0:
-                print('* name: ', item) 
-                print("* CAS: ", cas_number)
-                print("* odor type: ", odor_type)
+                #print('* name: ', item) 
+                #print("* CAS: ", cas_number)
+                #print("* odor type: ", odor_type)
                 if len(odor_dscp) > 0:
                     odor_dscp = [ele.get_text() for ele in odor_dscp[0]]
-                print("* odor dscp: ", odor_dscp)
+                #print("* odor dscp: ", odor_dscp)
                 data[item] = {}
                 data[item]["CAS"] = cas_number
                 data[item]["type"] = odor_type
@@ -67,10 +70,10 @@ for cat in categories:
                             data[item]["demo"][-1]['total'] = odor_amount
                         else:
                             data[item]["demo"][-1]['formula'][odor_name] = odor_amount
-                for ele in data[item]["demo"]:
-                    for key in ele:
-                        print("*", key, ": ",  ele[key])
-                print('='*20)
+                #for ele in data[item]["demo"]:
+                #    for key in ele:
+                #        print("*", key, ": ",  ele[key])
+                #print('='*20)
         with open(file_path, 'w') as outfile:
             json.dump(data, outfile)
                 
