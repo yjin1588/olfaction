@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+import tqdm
 
 json_list = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'JK', 'L', 'M',
             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'WX', 'Y', 'Z']
@@ -15,7 +16,7 @@ def make_item_lists(file_path):
     with open(file_path) as json_file:
         dataset = json.load(json_file)
         for key in dataset:
-            items.add(convert_to_str(key))
+            items.add(key)
             demo = dataset[key]['demo']
 
             for i in range(len(demo)):
@@ -23,15 +24,13 @@ def make_item_lists(file_path):
                 total = demo[i]['total']
 
                 for item in formula:
-                    items.add(convert_to_str(item))
+                    items.add(item)
     return items
 
 item_lists = set()
 for alphabet in json_list:
     item_lists.update(make_item_lists('./datasets/{}.json'.format(alphabet)))
-for i in item_lists:
-    print(type(i))
-exit()
+
 
 
 '''
@@ -43,23 +42,32 @@ name_#2 |  amount_#2-1  |  amount_#2-2  |  amount_#2-3   ...
 --------------------------------------------------------
 '''
 
-# with open('./datasets/A.json') as json_file:
-#     table = pd.DataFrame({})
-#     dataset = json.load(json_file)
-#     for key in dataset:
-#         demo = dataset[key]['demo']
-#         for i in range(len(demo)):
-#             data_format = dict.fromkeys(item_lists, 0.0)
-#             formula = demo[i]['formula']
-#             total = float(convert_to_str(demo[i]['total']))
-#             name = convert_to_str(demo[i]['name'])
-#             for sub_item in formula:
-#                 sub_item = convert_to_str(sub_item)
-#                 if type(sub_item) is not str:
-#                     continue
-#                 amount = convert_to_str(formula[sub_item])
-#                 amount = 0.0 if type(amount) is bytes else float(amount)
-#                 data_format[sub_item] = amount/total
-#             table.append(pd.DataFrame(data_format, index=name))
-#             print(table)
-#             exit()
+
+def add_to_dataframe(data_frame, json_path):
+    with open(json_path) as json_file:
+        dataset = json.load(json_file)
+        for key in dataset:
+            demo = dataset[key]['demo']
+            for i in range(len(demo)):
+                data_format = dict.fromkeys(item_lists, 0.0)
+                formula = demo[i]['formula']
+                total = float(demo[i]['total'])
+                #name = demo[i]['name'] 
+                for sub_item in formula:
+                    #if type(sub_item) is not str:
+                    #    continue
+                    if formula[sub_item] == 'trace':
+                        data_format[sub_item] = 0.0001
+                    else:
+                        amount = float(formula[sub_item])
+                        #amount = 0.0 if type(amount) is bytes else float(amount)
+                        data_format[sub_item] = amount/total
+                data_frame = data_frame.append(data_format, ignore_index=True)
+    return data_frame
+
+
+table = pd.DataFrame()
+for alphabet in tqdm.tqdm(json_list):
+    table = add_to_dataframe(table, './datasets/{}.json'.format(alphabet))
+table.to_csv('./datasets/AtoZ_relative.csv', sep=',', na_rep='NaN', float_format='%.2f')
+    
