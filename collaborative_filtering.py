@@ -69,5 +69,5 @@ def add_to_dataframe(data_frame, json_path):
 table = pd.DataFrame()
 for alphabet in tqdm.tqdm(json_list):
     table = add_to_dataframe(table, './datasets/{}.json'.format(alphabet))
-table.to_csv('./datasets/AtoZ_relative.csv', sep=',', na_rep='NaN', float_format='%.2f')
+table.to_csv('./datasets/AtoZ_relative.csv', sep=',', na_rep='NaN', float_format='%.6e')
     
